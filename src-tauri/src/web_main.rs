@@ -1,8 +1,11 @@
 use clap::Parser;
 
+#[allow(dead_code)]
 mod checkpoint;
 mod claude_binary;
+#[allow(dead_code)]
 mod commands;
+#[allow(dead_code)]
 mod process;
 mod web_server;
 
