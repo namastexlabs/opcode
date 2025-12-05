@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Bot, FolderCode } from "lucide-react";
 import { api, type Project, type Session, type ClaudeMdFile } from "@/lib/api";
@@ -11,12 +11,14 @@ import { ProjectList } from "@/components/ProjectList";
 import { FilePicker } from "@/components/FilePicker";
 import { SessionList } from "@/components/SessionList";
 import { CustomTitlebar } from "@/components/CustomTitlebar";
-import { MarkdownEditor } from "@/components/MarkdownEditor";
 import { ClaudeFileEditor } from "@/components/ClaudeFileEditor";
-import { Settings } from "@/components/Settings";
 import { CCAgents } from "@/components/CCAgents";
-import { UsageDashboard } from "@/components/UsageDashboard";
-import { MCPManager } from "@/components/MCPManager";
+
+// Lazy-loaded components for legacy view cases (reduces bundle duplication with TabContent.tsx)
+const MarkdownEditor = lazy(() => import("@/components/MarkdownEditor").then(m => ({ default: m.MarkdownEditor })));
+const Settings = lazy(() => import("@/components/Settings").then(m => ({ default: m.Settings })));
+const UsageDashboard = lazy(() => import("@/components/UsageDashboard").then(m => ({ default: m.UsageDashboard })));
+const MCPManager = lazy(() => import("@/components/MCPManager").then(m => ({ default: m.MCPManager })));
 import { NFOCredits } from "@/components/NFOCredits";
 import { ClaudeBinaryDialog } from "@/components/ClaudeBinaryDialog";
 import { Toast, ToastContainer } from "@/components/ui/toast";
@@ -301,13 +303,19 @@ function AppContent() {
 
       case "editor":
         return (
-          <div className="flex-1 overflow-hidden">
-            <MarkdownEditor onBack={() => handleViewChange("welcome")} />
-          </div>
+          <Suspense fallback={<div className="flex-1 overflow-hidden" />}>
+            <div className="flex-1 overflow-hidden">
+              <MarkdownEditor onBack={() => handleViewChange("welcome")} />
+            </div>
+          </Suspense>
         );
-      
+
       case "settings":
-        return <Settings onBack={() => handleViewChange("welcome")} />;
+        return (
+          <Suspense fallback={<div className="flex-1" />}>
+            <Settings onBack={() => handleViewChange("welcome")} />
+          </Suspense>
+        );
       
       case "projects":
         if (selectedProject) {
@@ -348,12 +356,16 @@ function AppContent() {
       
       case "usage-dashboard":
         return (
-          <UsageDashboard onBack={() => handleViewChange("welcome")} />
+          <Suspense fallback={<div className="flex-1" />}>
+            <UsageDashboard onBack={() => handleViewChange("welcome")} />
+          </Suspense>
         );
-      
+
       case "mcp":
         return (
-          <MCPManager onBack={() => handleViewChange("welcome")} />
+          <Suspense fallback={<div className="flex-1" />}>
+            <MCPManager onBack={() => handleViewChange("welcome")} />
+          </Suspense>
         );
       
       case "project-settings":

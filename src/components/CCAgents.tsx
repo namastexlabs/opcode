@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -35,9 +35,11 @@ import { save, open } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import { cn } from "@/lib/utils";
 import { Toast, ToastContainer } from "@/components/ui/toast";
-import { CreateAgent } from "./CreateAgent";
-import { AgentExecution } from "./AgentExecution";
 import { AgentRunsList } from "./AgentRunsList";
+
+// Lazy-loaded components (also lazy-loaded in TabContent.tsx - consistent pattern)
+const CreateAgent = lazy(() => import("./CreateAgent").then(m => ({ default: m.CreateAgent })));
+const AgentExecution = lazy(() => import("./AgentExecution").then(m => ({ default: m.AgentExecution })));
 import { GitHubAgentBrowser } from "./GitHubAgentBrowser";
 import { ICON_MAP } from "./IconPicker";
 
@@ -256,32 +258,38 @@ export const CCAgents: React.FC<CCAgentsProps> = ({ onBack, className }) => {
 
   if (view === "create") {
     return (
-      <CreateAgent
-        onBack={() => setView("list")}
-        onAgentCreated={handleAgentCreated}
-      />
+      <Suspense fallback={<div className="flex-1" />}>
+        <CreateAgent
+          onBack={() => setView("list")}
+          onAgentCreated={handleAgentCreated}
+        />
+      </Suspense>
     );
   }
 
   if (view === "edit" && selectedAgent) {
     return (
-      <CreateAgent
-        agent={selectedAgent}
-        onBack={() => setView("list")}
-        onAgentCreated={handleAgentUpdated}
-      />
+      <Suspense fallback={<div className="flex-1" />}>
+        <CreateAgent
+          agent={selectedAgent}
+          onBack={() => setView("list")}
+          onAgentCreated={handleAgentUpdated}
+        />
+      </Suspense>
     );
   }
 
   if (view === "execute" && selectedAgent) {
     return (
-      <AgentExecution
-        agent={selectedAgent}
-        onBack={() => {
-          setView("list");
-          handleExecutionComplete();
-        }}
-      />
+      <Suspense fallback={<div className="flex-1" />}>
+        <AgentExecution
+          agent={selectedAgent}
+          onBack={() => {
+            setView("list");
+            handleExecutionComplete();
+          }}
+        />
+      </Suspense>
     );
   }
 

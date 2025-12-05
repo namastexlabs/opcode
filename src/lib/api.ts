@@ -1,5 +1,6 @@
 import { apiCall } from './apiAdapter';
 import type { HooksConfiguration } from '@/types/hooks';
+import { HooksManager } from '@/lib/hooksManager';
 
 /** Process type for tracking in ProcessRegistry */
 export type ProcessType = 
@@ -1852,8 +1853,7 @@ export const api = {
         this.getHooksConfig('local', projectPath)
       ]);
 
-      // Import HooksManager for merging
-      const { HooksManager } = await import('@/lib/hooksManager');
+      // Merge hooks configurations
       return HooksManager.mergeConfigs(userHooks, projectHooks, localHooks);
     } catch (error) {
       console.error("Failed to get merged hooks config:", error);
